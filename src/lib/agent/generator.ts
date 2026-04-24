@@ -1,4 +1,5 @@
 import { chatJson } from "../clients/llm";
+import { buildSubstackEdition } from "../clients/substack";
 import type {
   AgentConfig,
   AnswerBlock,
@@ -31,7 +32,25 @@ export async function generateContent(
     generateOutreach(context, config),
   ]);
 
-  return { faq: answerBlocks, blog, podcast, outreach };
+  const baseContent = { faq: answerBlocks, blog, podcast, outreach };
+  const substack = buildSubstackEdition({
+    company: profile.name,
+    profile,
+    answerBlocks,
+    sources: [],
+    content: {
+      ...baseContent,
+      substack: {
+        title: blog.title,
+        subtitle: profile.summary,
+        slug: blog.slug,
+        body_markdown: "",
+        tags: [],
+      },
+    },
+  });
+
+  return { ...baseContent, substack };
 }
 
 async function generateBlog(

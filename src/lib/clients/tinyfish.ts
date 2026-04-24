@@ -21,19 +21,20 @@ export async function fetchWithTinyFish(
   }
 
   const endpoint =
-    (config.tinyfishEndpoint || "https://api.tinyfish.io").replace(/\/$/, "");
+    (config.tinyfishEndpoint || "https://api.fetch.tinyfish.ai").replace(
+      /\/$/,
+      ""
+    );
 
   try {
-    const res = await fetch(`${endpoint}/v1/fetch`, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${config.tinyfishApiKey}`,
+        "X-API-Key": config.tinyfishApiKey,
       },
       body: JSON.stringify({
-        url,
-        render_js: opts.renderJs ?? true,
-        wait_ms: opts.waitMs ?? 1500,
+        urls: [url],
         format: "html",
       }),
     });
@@ -44,17 +45,28 @@ export async function fetchWithTinyFish(
     }
 
     const data = (await res.json()) as {
-      html?: string;
-      content?: string;
-      body?: string;
-      status?: number;
+      results?: {
+        url?: string;
+        final_url?: string;
+        text?: string;
+      }[];
+      errors?: { url?: string; error?: string }[];
     };
 
-    const html = data.html || data.content || data.body || "";
+    if (data.errors?.length) {
+      throw new Error(
+        `TinyFish fetch failed: ${data.errors
+          .map((entry) => `${entry.url || url} ${entry.error || "unknown error"}`)
+          .join("; ")}`
+      );
+    }
+
+    const page = data.results?.[0];
+    const html = page?.text || "";
     return {
-      url,
+      url: page?.final_url || url,
       html,
-      status: data.status ?? res.status,
+      status: res.status,
       fetchedBy: "tinyfish",
       fetchedAt: new Date().toISOString(),
     };

@@ -23,12 +23,28 @@ export function fromEnv(): AgentConfig {
     llmProvider: (process.env.LLM_PROVIDER as "openai" | "anthropic") || "openai",
     llmApiKey: process.env.LLM_API_KEY || "",
     llmModel: process.env.LLM_MODEL || "gpt-4o-mini",
-    tinyfishApiKey: process.env.TINYFISH_API_KEY,
-    tinyfishEndpoint: process.env.TINYFISH_ENDPOINT,
-    wundergraphEndpoint: process.env.WUNDERGRAPH_ENDPOINT,
-    ghostAdminUrl: process.env.GHOST_ADMIN_URL,
-    ghostAdminKey: process.env.GHOST_ADMIN_KEY,
-    databaseUrl: process.env.DATABASE_URL,
+    tinyfishApiKey: process.env.TINYFISH_API_KEY || "",
+    tinyfishEndpoint:
+      process.env.TINYFISH_ENDPOINT || "https://api.fetch.tinyfish.ai",
+    tinyfishAgentEndpoint:
+      process.env.TINYFISH_AGENT_ENDPOINT ||
+      "https://agent.tinyfish.ai/v1/automation",
+    wundergraphEndpoint: process.env.WUNDERGRAPH_ENDPOINT || "/api",
+    ghostAdminUrl: process.env.GHOST_ADMIN_URL || "",
+    ghostAdminKey: process.env.GHOST_ADMIN_KEY || "",
+    substackPublicationUrl: process.env.SUBSTACK_PUBLICATION_URL || "",
+    substackEmail: process.env.SUBSTACK_EMAIL || "",
+    substackPassword: process.env.SUBSTACK_PASSWORD || "",
+    substackPublishMode:
+      (process.env.SUBSTACK_PUBLISH_MODE as "draft" | "publish") || "draft",
+    substackSendEmail: process.env.SUBSTACK_SEND_EMAIL === "true",
+    substackAudience:
+      (process.env.SUBSTACK_AUDIENCE as
+        | "everyone"
+        | "free"
+        | "paid"
+        | "founding") || "everyone",
+    databaseUrl: process.env.DATABASE_URL || "",
   };
 }
 

@@ -6,9 +6,16 @@ export interface AgentConfig {
   llmModel: string;
   tinyfishApiKey?: string;
   tinyfishEndpoint?: string;
+  tinyfishAgentEndpoint?: string;
   wundergraphEndpoint?: string;
   ghostAdminUrl?: string;
   ghostAdminKey?: string;
+  substackPublicationUrl?: string;
+  substackEmail?: string;
+  substackPassword?: string;
+  substackPublishMode?: "draft" | "publish";
+  substackSendEmail?: boolean;
+  substackAudience?: "everyone" | "free" | "paid" | "founding";
   databaseUrl?: string;
 }
 
@@ -77,11 +84,28 @@ export interface BlogPost {
   body_markdown: string;
 }
 
+export interface SubstackEdition {
+  title: string;
+  subtitle: string;
+  slug: string;
+  body_markdown: string;
+  tags: string[];
+}
+
 export interface GeneratedContent {
   faq: AnswerBlock[];
   blog: BlogPost;
   podcast: PodcastScript;
   outreach: InfluencerOutreach[];
+  substack: SubstackEdition;
+}
+
+export interface PublishResult {
+  published: boolean;
+  url?: string;
+  note?: string;
+  status?: string;
+  runId?: string;
 }
 
 export interface JobStep {
@@ -102,6 +126,7 @@ export interface AnalysisJob {
   profile?: CompanyProfile;
   answerBlocks: AnswerBlock[];
   content?: GeneratedContent;
-  ghost?: { published: boolean; url?: string; note?: string };
+  ghost?: PublishResult;
+  substack?: PublishResult;
   error?: string;
 }

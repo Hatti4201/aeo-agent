@@ -6,6 +6,7 @@ export interface AnalyzeInput {
   urls: string[];
   config: AgentConfig;
   publishGhost?: boolean;
+  publishSubstack?: boolean;
 }
 
 export type AnalyzeOperation = (input: AnalyzeInput) => Promise<AnalysisJob>;

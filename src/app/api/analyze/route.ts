@@ -13,6 +13,7 @@ export async function POST(req: Request) {
       company: body.company,
       urls: body.urls || [],
       publishGhost: Boolean(body.publishGhost),
+      publishSubstack: Boolean(body.publishSubstack),
       config,
     });
     return NextResponse.json(job);

@@ -8,6 +8,7 @@ import { structure } from "./structurer";
 import { synthesizeKnowledge } from "./knowledge";
 import { generateContent } from "./generator";
 import { publishToGhost } from "../clients/ghost";
+import { buildSubstackEdition, publishToSubstack } from "../clients/substack";
 import type {
   AgentConfig,
   AnalysisJob,
@@ -20,6 +21,7 @@ export interface RunInput {
   urls: string[];
   config: AgentConfig;
   publishGhost?: boolean;
+  publishSubstack?: boolean;
 }
 
 /**
@@ -98,7 +100,17 @@ export async function runPipeline(input: RunInput): Promise<AnalysisJob> {
     addStep(id, "knowledge", "done", `Profile + ${answerBlocks.length} answer blocks`);
 
     // 7. Content generation (parallel)
-    const content = await generateContent(profile, answerBlocks, input.config);
+    let content = await generateContent(profile, answerBlocks, input.config);
+    content = {
+      ...content,
+      substack: buildSubstackEdition({
+        company: input.company,
+        profile,
+        answerBlocks,
+        sources: structured,
+        content,
+      }),
+    };
     jobStore.update(id, { content });
     addStep(id, "generate", "done", `Blog, podcast, ${content.outreach.length} outreach messages`);
 
@@ -107,6 +119,18 @@ export async function runPipeline(input: RunInput): Promise<AnalysisJob> {
       const ghost = await publishToGhost(content.blog, input.config);
       jobStore.update(id, { ghost });
       addStep(id, "ghost", ghost.published ? "done" : "skip", ghost.note || "");
+    }
+
+    // 9. Optional Substack publishing via TinyFish Agent API
+    if (input.publishSubstack) {
+      const substack = await publishToSubstack(content.substack, input.config);
+      jobStore.update(id, { substack });
+      addStep(
+        id,
+        "substack",
+        substack.published ? "done" : "skip",
+        substack.note || ""
+      );
     }
 
     return jobStore.update(id, { status: "complete" })!;
